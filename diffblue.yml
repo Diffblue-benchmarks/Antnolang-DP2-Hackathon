@@ -1,0 +1,446 @@
+buildCmd: cd "./Acme-Personal-Trainer"; mvn -e -X -Dmaven.test.skip=true compile
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+# Target TGF: 229.5
+#  >methods=2
+#  >complexity=51
+#  >construction=9.0
+#  >dependency=0.5
+ - target:
+   - dir: Acme-Personal-Trainer/target/classes
+     file: utilities/HashPassword.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: utilities/HashPassword.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: utilities/internal/ThrowablePrinter.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: utilities/internal/ThrowablePrinter.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: utilities/internal/ConsoleReader.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: utilities/internal/ConsoleReader.java
+# Target TGF: 266.25
+#  >methods=17
+#  >complexity=705
+#  >construction=9.64285714286
+#  >dependency=8.83333333333
+ - target:
+   - dir: Acme-Personal-Trainer/target/classes
+     file: services/UtilityService.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: services/UtilityService.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: forms/UserAccountForm.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: forms/UserAccountForm.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: domain/CreditCard.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: domain/CreditCard.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: forms/RegistrationForm.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: forms/RegistrationForm.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: domain/Customisation.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: domain/Customisation.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: security/UserAccountService.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: security/UserAccountService.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: services/CustomisationService.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: services/CustomisationService.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: domain/Actor.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: domain/Actor.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: services/WorkingOutService.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: services/WorkingOutService.java
+# Target TGF: 306.0
+#  >methods=3
+#  >complexity=102
+#  >construction=9.0
+#  >dependency=0.333333333333
+ - target:
+   - dir: Acme-Personal-Trainer/target/classes
+     file: utilities/internal/DatabaseEnquirer.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: utilities/internal/DatabaseEnquirer.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: utilities/internal/EclipseConsole.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: utilities/internal/EclipseConsole.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: utilities/internal/ConsoleReader.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: utilities/internal/ConsoleReader.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: utilities/internal/ThrowablePrinter.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: utilities/internal/ThrowablePrinter.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: utilities/internal/DatabaseUtil.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: utilities/internal/DatabaseUtil.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: utilities/internal/SchemaPrinter.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: utilities/internal/SchemaPrinter.java
+# Target TGF: 409.0
+#  >methods=7
+#  >complexity=89
+#  >construction=10.0
+#  >dependency=2.0
+ - target:
+   - dir: Acme-Personal-Trainer/target/classes
+     file: security/Authority.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: security/Authority.java
+# Target TGF: 279.0
+#  >methods=3
+#  >complexity=31
+#  >construction=9.0
+#  >dependency=1.0
+ - target:
+   - dir: Acme-Personal-Trainer/target/classes
+     file: utilities/internal/EclipseConsole.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: utilities/internal/EclipseConsole.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: utilities/internal/EclipseStream.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: utilities/internal/EclipseStream.java
+# Target TGF: 190.978571429
+#  >methods=24
+#  >complexity=605
+#  >construction=11.5285714286
+#  >dependency=17.0
+ - target:
+   - dir: Acme-Personal-Trainer/target/classes
+     file: services/ApplicationService.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: services/ApplicationService.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: domain/Trainer.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: domain/Trainer.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: domain/Customer.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: domain/Customer.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: services/UtilityService.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: services/UtilityService.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: domain/CreditCard.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: domain/CreditCard.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: domain/Application.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: domain/Application.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: services/TrainerService.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: services/TrainerService.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: domain/WorkingOut.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: domain/WorkingOut.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: repositories/ApplicationRepository.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: repositories/ApplicationRepository.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: services/CustomerService.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: services/CustomerService.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: services/CreditCardService.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: services/CreditCardService.java
+# Target TGF: 842.4
+#  >methods=6
+#  >complexity=312
+#  >construction=22.5
+#  >dependency=3.2
+ - target:
+   - dir: Acme-Personal-Trainer/target/classes
+     file: utilities/internal/DatabasePopulator.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: utilities/internal/DatabasePopulator.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: utilities/internal/EclipseConsole.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: utilities/internal/EclipseConsole.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: utilities/internal/ThrowablePrinter.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: utilities/internal/ThrowablePrinter.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: domain/DomainEntity.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: domain/DomainEntity.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: utilities/internal/DatabaseUtil.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: utilities/internal/DatabaseUtil.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: utilities/internal/SchemaPrinter.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: utilities/internal/SchemaPrinter.java
+# Target TGF: 621.0
+#  >methods=3
+#  >complexity=69
+#  >construction=9.0
+#  >dependency=1.0
+ - target:
+   - dir: Acme-Personal-Trainer/target/classes
+     file: utilities/internal/ThrowablePrinter.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: utilities/internal/ThrowablePrinter.java
+# Target TGF: 5013.0
+#  >methods=17
+#  >complexity=557
+#  >construction=135.0
+#  >dependency=15.0
+ - target:
+   - dir: Acme-Personal-Trainer/target/classes
+     file: utilities/internal/SchemaPrinter.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: utilities/internal/SchemaPrinter.java
+# Target TGF: 207.307142857
+#  >methods=27
+#  >complexity=1190
+#  >construction=6.95
+#  >dependency=16.0
+ - target:
+   - dir: Acme-Personal-Trainer/target/classes
+     file: services/MessageService.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: services/MessageService.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: domain/Article.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: domain/Article.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: services/UtilityService.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: services/UtilityService.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: repositories/MessageRepository.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: repositories/MessageRepository.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: domain/Nutritionist.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: domain/Nutritionist.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: services/CustomerService.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: services/CustomerService.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: services/ActorService.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: services/ActorService.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: domain/Customisation.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: domain/Customisation.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: services/BoxService.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: services/BoxService.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: domain/Message.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: domain/Message.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: domain/WorkingOut.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: domain/WorkingOut.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: services/CustomisationService.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: services/CustomisationService.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: services/AdministratorService.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: services/AdministratorService.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: forms/MessageForm.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: forms/MessageForm.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: domain/Box.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: domain/Box.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: domain/Application.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: domain/Application.java
+   - dir: Acme-Personal-Trainer/target/classes
+     file: domain/Actor.class
+     sourceDir: Acme-Personal-Trainer/src/main/java
+     sourceFile: domain/Actor.java
